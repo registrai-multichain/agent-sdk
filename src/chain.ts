@@ -91,6 +91,12 @@ export const attestationAbi = [
   },
 ] as const;
 
+/**
+ * Configuration the SDK needs to attest against a specific EVM deployment.
+ * Registrai is multichain by design — pass the right contracts + RPC for
+ * whichever chain your agent targets (Arc, HyperEVM, any EVM port). For
+ * non-EVM chains (Sui Move, etc.) there will be sibling SDK packages.
+ */
 export interface ChainContext {
   rpcUrl: string;
   privateKey: Hex;
@@ -99,7 +105,11 @@ export interface ChainContext {
   feedId: Hex;
   /** The IPFS CID the agent committed to at registration. */
   methodologyCid: string;
+  /** Optional chain id (for viem gas-estimation hints). */
   chainId?: number;
+  /** Optional native currency display info. Defaults to a generic placeholder
+   *  — viem only uses this for human-readable gas summaries. */
+  nativeCurrency?: { name: string; symbol: string; decimals: number };
 }
 
 export interface AttestArgs {
@@ -107,12 +117,14 @@ export interface AttestArgs {
   inputHash: Hex;
 }
 
+const DEFAULT_NATIVE = { name: "Native", symbol: "GAS", decimals: 18 } as const;
+
 function client(ctx: ChainContext) {
   const chain = ctx.chainId
     ? defineChain({
         id: ctx.chainId,
         name: `chain-${ctx.chainId}`,
-        nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
+        nativeCurrency: ctx.nativeCurrency ?? DEFAULT_NATIVE,
         rpcUrls: { default: { http: [ctx.rpcUrl] } },
       })
     : undefined;
