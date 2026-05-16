@@ -77,6 +77,16 @@ export const attestationAbi = [
   },
   {
     type: "function",
+    name: "attestWithRule",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "feedId", type: "bytes32" },
+      { name: "rawInputs", type: "int256[]" },
+    ],
+    outputs: [{ name: "attestationId", type: "bytes32" }],
+  },
+  {
+    type: "function",
     name: "latestValue",
     stateMutability: "view",
     inputs: [
@@ -115,6 +125,10 @@ export interface ChainContext {
 export interface AttestArgs {
   value: bigint | number;
   inputHash: Hex;
+}
+
+export interface AttestWithRuleArgs {
+  rawInputs: Array<bigint | number>;
 }
 
 const DEFAULT_NATIVE = { name: "Native", symbol: "GAS", decimals: 18 } as const;
@@ -206,5 +220,38 @@ export async function submitAttestation(ctx: ChainContext, args: AttestArgs): Pr
     throw new Error(`attest: tx reverted (${hash})`);
   }
   log.info("attest: tx confirmed", { hash, block: receipt.blockNumber.toString() });
+  return hash;
+}
+
+/**
+ * Submit a rule-bound attestation. The Attestation contract reads the
+ * agent's bound rule from Registry, calls `rule.submit(rawInputs)`, and
+ * records the resulting value. The agent SDK never computes the final
+ * value off-chain in this path — only fetches and forwards raw inputs.
+ */
+export async function submitAttestationWithRule(
+  ctx: ChainContext,
+  args: AttestWithRuleArgs,
+): Promise<Hex> {
+  const { publicClient, account } = client(ctx);
+  const walletClient = createWalletClient({ account, transport: http(ctx.rpcUrl) });
+
+  const rawInputs = args.rawInputs.map((v) => BigInt(v));
+  const { request } = await publicClient.simulateContract({
+    account,
+    address: ctx.attestationAddress,
+    abi: attestationAbi,
+    functionName: "attestWithRule",
+    args: [ctx.feedId, rawInputs],
+  });
+
+  const hash = await walletClient.writeContract(request);
+  log.info("attestWithRule: tx submitted", { hash, n: rawInputs.length });
+
+  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  if (receipt.status !== "success") {
+    throw new Error(`attestWithRule: tx reverted (${hash})`);
+  }
+  log.info("attestWithRule: tx confirmed", { hash, block: receipt.blockNumber.toString() });
   return hash;
 }

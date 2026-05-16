@@ -1,6 +1,6 @@
 {
   "name": "@registrai/agent-sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "TypeScript SDK for writing oracle agents on the Registrai protocol. Runtime-agnostic — works in Node, Cloudflare Workers, Phala CVMs, any modern JS runtime.",
   "license": "MIT",
   "homepage": "https://registrai.cc",

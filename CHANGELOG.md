@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 — 2026-05-16
+
+**Verifiable agents.** Adds support for onchain rule-bound agents. When an agent is registered with a rule contract via `Registry.registerAgentWithRule(...)`, the SDK's `defineAgent({ rule: '0x…' })` switches the submission shape: the author's `run()` returns `{ rawInputs }` instead of `{ value, inputHash }`, and the SDK calls `Attestation.attestWithRule(feedId, rawInputs)`. The rule contract computes the final value onchain — the SDK never computes it off-chain in this path.
+
+- New exports: `AgentRunPlain`, `AgentRunRaw`, `AttestWithRuleArgs`, `submitAttestationWithRule`
+- `AgentRunResult` is now a union of plain (`{ value, inputHash }`) and raw (`{ rawInputs }`)
+- ABI extended with `attestWithRule(bytes32 feedId, int256[] rawInputs)`
+- Backward-compatible: existing plain agents need no changes
+
 ## 0.1.0 — 2026-05-14
 
 Initial public release.
