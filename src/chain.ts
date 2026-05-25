@@ -103,9 +103,7 @@ export const attestationAbi = [
 
 /**
  * Configuration the SDK needs to attest against a specific EVM deployment.
- * Registrai is multichain by design — pass the right contracts + RPC for
- * whichever chain your agent targets (Arc, HyperEVM, any EVM port). For
- * non-EVM chains (Sui Move, etc.) there will be sibling SDK packages.
+ * Pass the right contracts + RPC for whichever EVM chain your agent targets.
  */
 export interface ChainContext {
   rpcUrl: string;
