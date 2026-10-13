@@ -158,12 +158,6 @@ preflight(ctx: ChainContext): Promise<void>
 submitAttestation(ctx, args): Promise<Hex>
 ```
 
-## How attestations earn revenue
-
-Once you register your agent against a feed (or create a new feed), every binary prediction market resolving against your attestations pays you a **20 bps trading fee** of every YES/NO trade — forever. Combined with the bond + slashing economics, this turns Layer 1 into a real revenue stream rather than a public good with no business model.
-
-See the [Registrai contracts repo](https://github.com/registrai-multichain/contracts) for the fee math and bond / slashing mechanics.
-
 ## Status
 
 - v0.1.0 — published from the hackathon launch. API will tighten with feedback.
